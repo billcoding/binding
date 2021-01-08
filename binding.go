@@ -202,7 +202,6 @@ func (b *Binding) initMapFromReq(req *http.Request) {
 				})
 			}
 		case Body:
-
 			cts := strings.Split(req.Header.Get("Content-Type"), ";")
 			if len(cts) > 0 && strings.EqualFold(strings.TrimSpace(cts[0]), "application/json") {
 				bytes, err := ioutil.ReadAll(req.Body)
