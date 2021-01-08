@@ -5,17 +5,17 @@ import (
 	"reflect"
 )
 
-//Define defaultFunc
+// defaultFunc struct
 type defaultFunc struct {
 	defaultVal string
 }
 
-//DefaultFunc
+// DefaultFunc method
 func DefaultFunc(defaultVal string) BFunc {
 	return &defaultFunc{defaultVal}
 }
 
-//Bind
+// Bind method
 func (d *defaultFunc) Bind(inValue reflect.Value) (outValue reflect.Value) {
 	outValue = inValue
 	calls.True(!inValue.IsValid(), func() {

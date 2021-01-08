@@ -7,13 +7,13 @@ import (
 	"strings"
 )
 
-//Define joinFunc struct
+// joinFunc struct
 type joinFunc struct {
 	join   bool
 	joinsp string
 }
 
-//SplitFunc
+// SplitFunc method
 func JoinFunc(join bool, joinsp string) BFunc {
 	if joinsp == "" {
 		joinsp = ","
@@ -24,7 +24,7 @@ func JoinFunc(join bool, joinsp string) BFunc {
 	}
 }
 
-//Bind
+// Bind method
 func (j *joinFunc) Bind(inValue reflect.Value) (outValue reflect.Value) {
 	outValue = inValue
 	calls.True(j.join && inValue.IsValid() && (inValue.Type().Kind() == reflect.Slice || inValue.Type().Kind() == reflect.Array), func() {

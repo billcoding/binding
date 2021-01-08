@@ -94,7 +94,6 @@ func (b *Binding) BindXML(xmlData string) {
 	})
 }
 
-// setVal
 func (b *Binding) setVal() {
 	for pos, item := range b.items {
 		field := b.fields[pos]
@@ -178,10 +177,9 @@ func getSubMap(prefix string, dataMap map[string]interface{}) map[string]interfa
 	return m
 }
 
-// initMapFromReq
 func (b *Binding) initMapFromReq(req *http.Request) {
 	if req == nil {
-		panic("req is nil")
+		return
 	}
 	switch b.typ {
 	case Header:

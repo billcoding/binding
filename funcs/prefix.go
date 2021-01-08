@@ -5,17 +5,17 @@ import (
 	"reflect"
 )
 
-//Define prefixFunc struct
+// prefixFunc struct
 type prefixFunc struct {
 	prefix string
 }
 
-//PrefixFunc
+// PrefixFunc method
 func PrefixFunc(prefix string) BFunc {
 	return &prefixFunc{prefix}
 }
 
-//Bind
+// Bind method
 func (p *prefixFunc) Bind(inValue reflect.Value) (outValue reflect.Value) {
 	outValue = inValue
 	calls.True(p.prefix != "" && inValue.IsValid() && inValue.Type().Kind() == reflect.String, func() {

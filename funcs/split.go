@@ -6,13 +6,13 @@ import (
 	"strings"
 )
 
-//Define splitFunc struct
+// splitFunc struct
 type splitFunc struct {
 	split   bool
 	splitsp string
 }
 
-//SplitFunc
+// SplitFunc method
 func SplitFunc(split bool, splitsp string) BFunc {
 	if splitsp == "" {
 		splitsp = ","
@@ -23,7 +23,7 @@ func SplitFunc(split bool, splitsp string) BFunc {
 	}
 }
 
-//Bind
+// Bind method
 func (s *splitFunc) Bind(inValue reflect.Value) (outValue reflect.Value) {
 	outValue = inValue
 	calls.True(s.split && inValue.IsValid() && inValue.Type().Kind() == reflect.String, func() {

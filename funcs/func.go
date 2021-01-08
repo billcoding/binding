@@ -2,7 +2,8 @@ package funcs
 
 import "reflect"
 
-//Define BFunc struct
+// BFunc interface
 type BFunc interface {
+	// Bind call
 	Bind(inValue reflect.Value) (outValue reflect.Value)
 }

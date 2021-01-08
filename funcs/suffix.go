@@ -5,17 +5,17 @@ import (
 	"reflect"
 )
 
-//Define suffixFunc struct
+// suffixFunc struct
 type suffixFunc struct {
 	suffix string
 }
 
-//SuffixFunc
+// SuffixFunc method
 func SuffixFunc(suffix string) BFunc {
 	return &suffixFunc{suffix}
 }
 
-//Bind
+// Bind method
 func (s *suffixFunc) Bind(inValue reflect.Value) (outValue reflect.Value) {
 	outValue = inValue
 	calls.True(s.suffix != "" && inValue.IsValid() && inValue.Type().Kind() == reflect.String, func() {
