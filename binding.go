@@ -178,52 +178,47 @@ func getSubMap(prefix string, dataMap map[string]interface{}) map[string]interfa
 }
 
 func (b *Binding) initMapFromReq(req *http.Request) {
-	if req == nil {
-		return
-	}
-	switch b.typ {
-	case Header:
-		for k, v := range req.Header {
-			setMap(b.dataMap, k, v)
-		}
-	case Param:
-		_ = req.ParseForm()
-		for k, v := range req.Form {
-			setMap(b.dataMap, k, v)
-		}
-		cts := strings.Split(req.Header.Get("Content-Type"), ";")
-		if len(cts) > 0 {
-			switch strings.TrimSpace(cts[0]) {
-			case "multipart/form-data":
+	calls.NNil(req, func() {
+		switch b.typ {
+		case Header:
+			for k, v := range req.Header {
+				setMap(b.dataMap, k, v)
+			}
+		case Param:
+			_ = req.ParseForm()
+			for k, v := range req.Form {
+				setMap(b.dataMap, k, v)
+			}
+			cts := strings.Split(req.Header.Get("Content-Type"), ";")
+			if len(cts) > 0 && strings.EqualFold(strings.TrimSpace(cts[0]), "multipart/form-data") {
 				err := req.ParseMultipartForm(0)
-				if err == nil {
+				calls.Nil(err, func() {
 					for k, v := range req.MultipartForm.Value {
 						setMap(b.dataMap, k, v)
 					}
-				}
+				})
+				calls.NNil(err, func() {
+					b.logger.Printf("[initMapFromReq]%v\n", err)
+				})
 			}
-		}
-	case Body:
-		cts := strings.Split(req.Header.Get("Content-Type"), ";")
-		if len(cts) <= 0 {
-			b.logger.Println("[Bind]Not found header 'Content-Type'")
-			return
-		}
-		switch strings.TrimSpace(cts[0]) {
-		case "application/json":
-			bytes, err := ioutil.ReadAll(req.Body)
-			if err == nil && json.Valid(bytes) {
-				err := json.Unmarshal(bytes, &b.dataMap)
-				if err != nil {
-					b.logger.Printf("[Bind]%v\n", err)
-				}
-			}
-		default:
-			b.logger.Println("[Bind]Only support Content-Type of 'application/json'")
-		}
-	}
+		case Body:
 
-	if b.typ == Header || b.typ == Param {
-		recursiveMap(b.dataMap)
-	}
+			cts := strings.Split(req.Header.Get("Content-Type"), ";")
+			if len(cts) > 0 && strings.EqualFold(strings.TrimSpace(cts[0]), "application/json") {
+				bytes, err := ioutil.ReadAll(req.Body)
+				calls.True(err == nil && json.Valid(bytes), func() {
+					err := json.Unmarshal(bytes, &b.dataMap)
+					calls.NNil(err, func() {
+						b.logger.Printf("[Bind]%v\n", err)
+					})
+				})
+			} else {
+				b.logger.Println("[Bind]Not found header 'Content-Type'")
+				return
+			}
+		}
+		if b.typ == Header || b.typ == Param {
+			recursiveMap(b.dataMap)
+		}
+	})
 }
