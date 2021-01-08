@@ -84,7 +84,7 @@ func (b *Binding) BindJSON(jsonData string) {
 // BindXML
 func (b *Binding) BindXML(xmlData string) {
 	m := make(map[string]interface{}, 0)
-	err := xml.Unmarshal([]byte(xmlData), m)
+	err := xml.Unmarshal([]byte(xmlData), &m)
 	calls.NNil(err, func() {
 		b.logger.Printf("[BindXML]%v\n", err)
 	})
@@ -193,12 +193,15 @@ func (b *Binding) initMapFromReq(req *http.Request) {
 		for k, v := range req.Form {
 			setMap(b.dataMap, k, v)
 		}
-		switch req.Header.Get("Content-Type") {
-		case "multipart/form-data":
-			err := req.ParseMultipartForm(0)
-			if err == nil {
-				for k, v := range req.MultipartForm.Value {
-					setMap(b.dataMap, k, v)
+		cts := strings.Split(req.Header.Get("Content-Type"), ";")
+		if len(cts) > 0 {
+			switch strings.TrimSpace(cts[0]) {
+			case "multipart/form-data":
+				err := req.ParseMultipartForm(0)
+				if err == nil {
+					for k, v := range req.MultipartForm.Value {
+						setMap(b.dataMap, k, v)
+					}
 				}
 			}
 		}
@@ -208,7 +211,7 @@ func (b *Binding) initMapFromReq(req *http.Request) {
 			b.logger.Println("[Bind]Not found header 'Content-Type'")
 			return
 		}
-		switch cts[0] {
+		switch strings.TrimSpace(cts[0]) {
 		case "application/json":
 			bytes, err := ioutil.ReadAll(req.Body)
 			if err == nil && json.Valid(bytes) {
