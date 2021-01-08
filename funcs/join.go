@@ -13,7 +13,7 @@ type joinFunc struct {
 	joinsp string
 }
 
-// SplitFunc method
+// JoinFunc method
 func JoinFunc(join bool, joinsp string) BFunc {
 	if joinsp == "" {
 		joinsp = ","
