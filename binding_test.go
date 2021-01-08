@@ -8,24 +8,24 @@ import (
 )
 
 type model4 struct {
-	Id   int    `binding:"name(id)"`
+	ID   int    `binding:"name(id)"`
 	Name string `binding:"name(name)"`
 }
 
 type model3 struct {
-	Id     int    `binding:"name(id)"`
+	ID     int    `binding:"name(id)"`
 	Name   string `binding:"name(name)"`
 	Model4 model4 `binding:"name(model4)"`
 }
 
 type model2 struct {
-	Id     int    `binding:"name(id)"`
+	ID     int    `binding:"name(id)"`
 	Name   string `binding:"name(name)"`
 	Model3 model3 `binding:"name(model3)"`
 }
 
 type model struct {
-	Id     int    `binding:"name(id)"`
+	ID     int    `binding:"name(id)"`
 	Name   string `binding:"name(name)"`
 	Model2 model2 `binding:"name(model2)"`
 }

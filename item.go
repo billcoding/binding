@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-// Item
+// Item struct
 type Item struct {
 	Name    string `alias:"name"`
 	Default string `alias:"default"`
@@ -30,7 +30,7 @@ func (i *Item) bfuncs() []funcs.BFunc {
 	}
 }
 
-// Bind
+// Bind call
 func (i *Item) Bind(field *reflect.StructField, value reflect.Value, dataMap map[string]interface{}) {
 	bfuncs := i.bfuncs()
 	name := i.Name

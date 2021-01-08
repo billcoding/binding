@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-// Binding
+// Binding struct
 type Binding struct {
 	structPtr interface{}
 	typ       *Type
@@ -23,12 +23,12 @@ type Binding struct {
 	dataMap   map[string]interface{}
 }
 
-// New
+// New return new Binding
 func New(structPtr interface{}) *Binding {
 	return NewWithType(structPtr, Body)
 }
 
-// NewWithType
+// NewWithType return new Binding
 func NewWithType(structPtr interface{}, typ *Type) *Binding {
 	items := make([]*Item, 0)
 	fields := reflectx.CreateFromTag(structPtr, &items, "alias", "binding")
@@ -56,19 +56,19 @@ func setMap(m map[string]interface{}, k string, v []string) {
 	}
 }
 
-// BindReq
+// BindReq start bind from Request
 func (b *Binding) BindReq(req *http.Request) {
 	b.initMapFromReq(req)
 	b.setVal()
 }
 
-// BindMap
+// BindMap start bind from data map
 func (b *Binding) BindMap(dataMap map[string]interface{}) {
 	b.dataMap = dataMap
 	b.setVal()
 }
 
-// BindJSON
+// BindJSON start bind from JSON
 func (b *Binding) BindJSON(jsonData string) {
 	m := make(map[string]interface{}, 0)
 	err := json.Unmarshal([]byte(jsonData), &m)
@@ -81,7 +81,7 @@ func (b *Binding) BindJSON(jsonData string) {
 	})
 }
 
-// BindXML
+// BindXML start bind from XML
 func (b *Binding) BindXML(xmlData string) {
 	m := make(map[string]interface{}, 0)
 	err := xml.Unmarshal([]byte(xmlData), &m)
