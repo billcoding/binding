@@ -1,2 +1,3 @@
 # binding
-A binding model data source in Request writtern in Golang
+
+A model binding written in Golang
