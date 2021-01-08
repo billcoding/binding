@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-//Define Item struct
+// Item
 type Item struct {
 	Name    string `alias:"name"`
 	Default string `alias:"default"`
@@ -19,7 +19,7 @@ type Item struct {
 	Suffix  string `alias:"suffix"`
 }
 
-//bfuncs
+// bfuncs
 func (i *Item) bfuncs() []funcs.BFunc {
 	return []funcs.BFunc{
 		funcs.DefaultFunc(i.Default),
@@ -30,7 +30,7 @@ func (i *Item) bfuncs() []funcs.BFunc {
 	}
 }
 
-//Bind
+// Bind
 func (i *Item) Bind(field *reflect.StructField, value reflect.Value, dataMap map[string]interface{}) {
 	bfuncs := i.bfuncs()
 	name := i.Name
@@ -44,7 +44,7 @@ func (i *Item) Bind(field *reflect.StructField, value reflect.Value, dataMap map
 	reflectx.SetValue(bindVal, value)
 }
 
-//String
+// String
 func (i *Item) String() string {
 	bytes, _ := json.Marshal(i)
 	return string(bytes)
