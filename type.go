@@ -5,8 +5,6 @@ var (
 	Header = &Type{"header"}
 	// Param Type
 	Param = &Type{"param"}
-	// Body Type
-	Body = &Type{"body"}
 )
 
 // Type struct

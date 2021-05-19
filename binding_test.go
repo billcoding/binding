@@ -1,26 +1,27 @@
 package binding
 
 import (
-	"bytes"
 	"encoding/json"
 	"net/http"
 	"testing"
 )
 
 type model4 struct {
-	ID   int    `binding:"name(id)"`
-	Name string `binding:"name(name)"`
+	ID    int    `binding:"name(model2.model3.model4.id)"`
+	Name  string `binding:"name(model2.model3.model4.name)"`
+	ID2   int    `binding:"name(xxx)"`
+	Name2 string `binding:"name(yyy)"`
 }
 
 type model3 struct {
-	ID     int    `binding:"name(id)"`
-	Name   string `binding:"name(name)"`
+	ID     int    `binding:"name(model2.model3.id)"`
+	Name   string `binding:"name(model2.model3.name)"`
 	Model4 model4 `binding:"name(model4)"`
 }
 
 type model2 struct {
-	ID     int    `binding:"name(id)"`
-	Name   string `binding:"name(name)"`
+	ID     int    `binding:"name(model2.id)"`
+	Name   string `binding:"name(model2.name)"`
 	Model3 model3 `binding:"name(model3)"`
 }
 
@@ -41,6 +42,8 @@ func buildParamReq() *http.Request {
 	req.Form.Set("model2.model3.name", "wangwu")
 	req.Form.Set("model2.model3.model4.id", "400")
 	req.Form.Set("model2.model3.model4.name", "zhaoliu")
+	req.Form.Set("xxx", "400")
+	req.Form.Set("yyy", "zha111111oliu")
 	return req
 }
 
@@ -58,44 +61,10 @@ func buildHeaderReq() *http.Request {
 	return req
 }
 
-func buildBodyReq() *http.Request {
-	j := `
-{
-    "id": 100,
-    "name": "zhangsan",
-    "model2": {
-        "id": 200,
-        "name": "lisi",
-    	"model3": {
-			"id": 300,
-			"name": "wangwu",
-			"model4": {
-				"id": 400,
-				"name": "zhaoliu"
-			}
-		}
-    }
-}
-`
-	var buffer bytes.Buffer
-	buffer.WriteString(j)
-	req, _ := http.NewRequest(http.MethodGet, "", &buffer)
-	req.Header.Set("Content-Type", "application/json")
-	return req
-}
-
 func TestBindingReqParam(t *testing.T) {
 	m := &model{}
 	binding := NewWithType(m, Param)
 	binding.BindReq(buildParamReq())
-	bs, _ := json.Marshal(m)
-	t.Log(string(bs))
-}
-
-func TestBindingReqBody(t *testing.T) {
-	m := &model{}
-	binding := NewWithType(m, Body)
-	binding.BindReq(buildBodyReq())
 	bs, _ := json.Marshal(m)
 	t.Log(string(bs))
 }

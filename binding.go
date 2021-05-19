@@ -1,11 +1,7 @@
 package binding
 
 import (
-	"encoding/json"
-	"encoding/xml"
-	"github.com/billcoding/calls"
 	"github.com/billcoding/reflectx"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -15,32 +11,30 @@ import (
 
 // Binding struct
 type Binding struct {
+	logger    *log.Logger
 	structPtr interface{}
 	typ       *Type
-	items     []*Item
 	fields    []*reflect.StructField
-	logger    *log.Logger
+	items     []interface{}
+	values    []*reflect.Value
 	dataMap   map[string]interface{}
 }
 
 // New return new Binding
 func New(structPtr interface{}) *Binding {
-	return NewWithType(structPtr, Body)
+	return NewWithType(structPtr, Param)
 }
 
 // NewWithType return new Binding
 func NewWithType(structPtr interface{}, typ *Type) *Binding {
-	items := make([]*Item, 0)
-	fields := reflectx.CreateFromTag(structPtr, &items, "alias", "binding")
-	if len(items) != len(fields) {
-		panic("[New]invalid len both items and fields")
-	}
+	structFields, structFieldValues, items := reflectx.ParseTag(structPtr, new(Item), "alias", "binding", true)
 	return &Binding{
+		logger:    log.New(os.Stdout, "[Binding]", log.LstdFlags),
 		structPtr: structPtr,
 		typ:       typ,
+		fields:    structFields,
 		items:     items,
-		fields:    fields,
-		logger:    log.New(os.Stdout, "[Binding]", log.LstdFlags),
+		values:    structFieldValues,
 		dataMap:   make(map[string]interface{}, 0),
 	}
 }
@@ -68,41 +62,13 @@ func (b *Binding) BindMap(dataMap map[string]interface{}) {
 	b.setVal()
 }
 
-// BindJSON start bind from JSON
-func (b *Binding) BindJSON(jsonData string) {
-	m := make(map[string]interface{}, 0)
-	err := json.Unmarshal([]byte(jsonData), &m)
-	calls.NNil(err, func() {
-		b.logger.Printf("[BindJSON]%v\n", err)
-	})
-	calls.Nil(err, func() {
-		b.dataMap = m
-		b.setVal()
-	})
-}
-
-// BindXML start bind from XML
-func (b *Binding) BindXML(xmlData string) {
-	m := make(map[string]interface{}, 0)
-	err := xml.Unmarshal([]byte(xmlData), &m)
-	calls.NNil(err, func() {
-		b.logger.Printf("[BindXML]%v\n", err)
-	})
-	calls.Nil(err, func() {
-		b.dataMap = m
-		b.setVal()
-	})
-}
-
 func (b *Binding) setVal() {
-	for pos, item := range b.items {
-		field := b.fields[pos]
-		value := reflect.ValueOf(b.structPtr).Elem().FieldByName(field.Name)
-		setVal(b.typ, item, field, value, b.dataMap)
+	for i, field := range b.fields {
+		setVal(b.typ, b.items[i].(*Item), field, b.values[i], b.dataMap)
 	}
 }
 
-func setVal(typ *Type, item *Item, field *reflect.StructField, value reflect.Value, dataMap map[string]interface{}) {
+func setVal(typ *Type, item *Item, field *reflect.StructField, value *reflect.Value, dataMap map[string]interface{}) {
 	var innerInterface interface{}
 	switch {
 	case field.Type.Kind() == reflect.Struct:
@@ -110,7 +76,7 @@ func setVal(typ *Type, item *Item, field *reflect.StructField, value reflect.Val
 	case field.Type.Kind() == reflect.Ptr && field.Type.Elem().Kind() == reflect.Struct:
 		innerInterface = value.Elem().Addr().Interface()
 	default:
-		item.Bind(field, value, dataMap)
+		item.Bind(field, *value, dataMap)
 		return
 	}
 	if innerInterface == nil {
@@ -124,17 +90,15 @@ func setVal(typ *Type, item *Item, field *reflect.StructField, value reflect.Val
 	if !ok {
 		return
 	}
-	items := make([]*Item, 0)
-	fields := reflectx.CreateFromTag(innerInterface, &items, "alias", "binding")
-	if len(items) != len(fields) {
-		panic("[New]invalid len both items and fields")
-	}
+	fields, fieldValues, items := reflectx.ParseTag(innerInterface, new(Item), "alias", "binding", false)
 	b := &Binding{
+		logger:    log.New(os.Stdout, "[Binding]", log.LstdFlags),
 		structPtr: innerInterface,
 		typ:       typ,
-		items:     items,
 		fields:    fields,
-		logger:    log.New(os.Stdout, "[Binding]", log.LstdFlags),
+		items:     items,
+		values:    fieldValues,
+		dataMap:   dataMap,
 	}
 	b.BindMap(innerDataMap)
 }
@@ -178,7 +142,7 @@ func getSubMap(prefix string, dataMap map[string]interface{}) map[string]interfa
 }
 
 func (b *Binding) initMapFromReq(req *http.Request) {
-	calls.NNil(req, func() {
+	if req != nil {
 		switch b.typ {
 		case Header:
 			for k, v := range req.Header {
@@ -192,32 +156,15 @@ func (b *Binding) initMapFromReq(req *http.Request) {
 			cts := strings.Split(req.Header.Get("Content-Type"), ";")
 			if len(cts) > 0 && strings.EqualFold(strings.TrimSpace(cts[0]), "multipart/form-data") {
 				err := req.ParseMultipartForm(0)
-				calls.Nil(err, func() {
+				if err != nil {
+					b.logger.Printf("[initMapFromReq]%v\n", err)
+				} else {
 					for k, v := range req.MultipartForm.Value {
 						setMap(b.dataMap, k, v)
 					}
-				})
-				calls.NNil(err, func() {
-					b.logger.Printf("[initMapFromReq]%v\n", err)
-				})
-			}
-		case Body:
-			cts := strings.Split(req.Header.Get("Content-Type"), ";")
-			if len(cts) > 0 && strings.EqualFold(strings.TrimSpace(cts[0]), "application/json") {
-				bytes, err := ioutil.ReadAll(req.Body)
-				calls.True(err == nil && json.Valid(bytes), func() {
-					err := json.Unmarshal(bytes, &b.dataMap)
-					calls.NNil(err, func() {
-						b.logger.Printf("[Bind]%v\n", err)
-					})
-				})
-			} else {
-				b.logger.Println("[Bind]Not found header 'Content-Type'")
-				return
+				}
 			}
 		}
-		if b.typ == Header || b.typ == Param {
-			recursiveMap(b.dataMap)
-		}
-	})
+		recursiveMap(b.dataMap)
+	}
 }

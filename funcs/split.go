@@ -1,7 +1,6 @@
 package funcs
 
 import (
-	"github.com/billcoding/calls"
 	"reflect"
 	"strings"
 )
@@ -26,8 +25,8 @@ func SplitFunc(split bool, splitsp string) BFunc {
 // Bind method
 func (s *splitFunc) Bind(inValue reflect.Value) (outValue reflect.Value) {
 	outValue = inValue
-	calls.True(s.split && inValue.IsValid() && inValue.Type().Kind() == reflect.String, func() {
+	if s.split && inValue.IsValid() && inValue.Type().Kind() == reflect.String {
 		outValue = reflect.ValueOf(strings.Split(inValue.String(), s.splitsp))
-	})
+	}
 	return outValue
 }

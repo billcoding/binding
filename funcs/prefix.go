@@ -1,7 +1,6 @@
 package funcs
 
 import (
-	"github.com/billcoding/calls"
 	"reflect"
 )
 
@@ -18,8 +17,8 @@ func PrefixFunc(prefix string) BFunc {
 // Bind method
 func (p *prefixFunc) Bind(inValue reflect.Value) (outValue reflect.Value) {
 	outValue = inValue
-	calls.True(p.prefix != "" && inValue.IsValid() && inValue.Type().Kind() == reflect.String, func() {
+	if p.prefix != "" && inValue.IsValid() && inValue.Type().Kind() == reflect.String {
 		outValue = reflect.ValueOf(p.prefix + inValue.String())
-	})
+	}
 	return outValue
 }

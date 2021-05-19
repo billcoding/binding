@@ -1,7 +1,6 @@
 package funcs
 
 import (
-	"github.com/billcoding/calls"
 	"reflect"
 )
 
@@ -18,8 +17,8 @@ func DefaultFunc(defaultVal string) BFunc {
 // Bind method
 func (d *defaultFunc) Bind(inValue reflect.Value) (outValue reflect.Value) {
 	outValue = inValue
-	calls.True(!inValue.IsValid(), func() {
+	if !inValue.IsValid() {
 		outValue = reflect.ValueOf(d.defaultVal)
-	})
+	}
 	return outValue
 }
