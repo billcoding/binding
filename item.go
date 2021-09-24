@@ -2,7 +2,6 @@ package binding
 
 import (
 	"encoding/json"
-	"github.com/billcoding/binding/funcs"
 	"github.com/billcoding/reflectx"
 	"reflect"
 )
@@ -12,33 +11,35 @@ type Item struct {
 	Name    string `alias:"name"`
 	Default string `alias:"default"`
 	Split   bool   `alias:"split"`
-	Splitsp string `alias:"splitsp"`
+	SplitSp string `alias:"split_sp"`
+	Trim    bool   `alias:"trim"`
+	TrimSp  string `alias:"trim_sp"`
 	Join    bool   `alias:"join"`
-	Joinsp  string `alias:"joinsp"`
+	JoinSp  string `alias:"join_sp"`
 	Prefix  string `alias:"prefix"`
 	Suffix  string `alias:"suffix"`
 }
 
-// bfuncs
-func (i *Item) bfuncs() []funcs.BFunc {
-	return []funcs.BFunc{
-		funcs.DefaultFunc(i.Default),
-		funcs.SplitFunc(i.Split, i.Splitsp),
-		funcs.JoinFunc(i.Join, i.Joinsp),
-		funcs.PrefixFunc(i.Prefix),
-		funcs.SuffixFunc(i.Suffix),
+func (i *Item) fs() []Func {
+	return []Func{
+		DefaultFunc(i.Default),
+		TrimFunc(i.Trim, i.TrimSp),
+		SplitFunc(i.Split, i.SplitSp),
+		JoinFunc(i.Join, i.JoinSp),
+		PrefixFunc(i.Prefix),
+		SuffixFunc(i.Suffix),
 	}
 }
 
 // Bind call
 func (i *Item) Bind(field *reflect.StructField, value reflect.Value, dataMap map[string]interface{}) {
-	bfuncs := i.bfuncs()
+	fs := i.fs()
 	name := i.Name
 	if name == "" {
 		name = field.Name
 	}
 	bindVal := reflect.ValueOf(dataMap[name])
-	for _, bFunc := range bfuncs {
+	for _, bFunc := range fs {
 		bindVal = bFunc.Bind(bindVal)
 	}
 	reflectx.SetValue(bindVal, value)

@@ -1,4 +1,4 @@
-package funcs
+package binding
 
 import (
 	"reflect"
@@ -10,7 +10,7 @@ type suffixFunc struct {
 }
 
 // SuffixFunc method
-func SuffixFunc(suffix string) BFunc {
+func SuffixFunc(suffix string) Func {
 	return &suffixFunc{suffix}
 }
 

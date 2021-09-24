@@ -1,8 +1,33 @@
 package binding
 
-import "testing"
+import (
+	"github.com/stretchr/testify/require"
+	"testing"
+)
 
-func TestBinding(t *testing.T) {
+func TestItemFs(t *testing.T) {
+	require.Equal(t, []Func{
+		DefaultFunc("100"),
+		TrimFunc(true, ""),
+		SplitFunc(true, ","),
+		JoinFunc(true, ","),
+		PrefixFunc("PREFIX"),
+		SuffixFunc("SUFFIX"),
+	}, (&Item{
+		Default: "100",
+		Trim:    true,
+		TrimSp:  "",
+		Split:   true,
+		SplitSp: ",",
+		Join:    true,
+		JoinSp:  ",",
+		Prefix:  "PREFIX",
+		Suffix:  "SUFFIX",
+	}).fs(),
+	)
+}
+
+func TestItemBind(t *testing.T) {
 	testItemCases := make([]*testItemCase, 0)
 	// test for name
 	{

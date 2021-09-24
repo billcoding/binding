@@ -1,4 +1,4 @@
-package funcs
+package binding
 
 import (
 	"fmt"
@@ -8,18 +8,18 @@ import (
 
 // joinFunc struct
 type joinFunc struct {
-	join   bool
-	joinsp string
+	join bool
+	sp   string
 }
 
 // JoinFunc method
-func JoinFunc(join bool, joinsp string) BFunc {
-	if joinsp == "" {
-		joinsp = ","
+func JoinFunc(join bool, sp string) Func {
+	if sp == "" {
+		sp = ","
 	}
 	return &joinFunc{
-		join:   join,
-		joinsp: joinsp,
+		join: join,
+		sp:   sp,
 	}
 }
 
@@ -31,7 +31,7 @@ func (j *joinFunc) Bind(inValue reflect.Value) (outValue reflect.Value) {
 		for i := 0; i < inValue.Len(); i++ {
 			joins = append(joins, fmt.Sprintf("%v", inValue.Index(i)))
 		}
-		outValue = reflect.ValueOf(strings.Join(joins, j.joinsp))
+		outValue = reflect.ValueOf(strings.Join(joins, j.sp))
 	}
 	return outValue
 }

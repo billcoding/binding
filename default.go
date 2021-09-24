@@ -1,4 +1,4 @@
-package funcs
+package binding
 
 import (
 	"reflect"
@@ -10,7 +10,7 @@ type defaultFunc struct {
 }
 
 // DefaultFunc method
-func DefaultFunc(defaultVal string) BFunc {
+func DefaultFunc(defaultVal string) Func {
 	return &defaultFunc{defaultVal}
 }
 

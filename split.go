@@ -1,4 +1,4 @@
-package funcs
+package binding
 
 import (
 	"reflect"
@@ -7,18 +7,18 @@ import (
 
 // splitFunc struct
 type splitFunc struct {
-	split   bool
-	splitsp string
+	split bool
+	sp    string
 }
 
 // SplitFunc method
-func SplitFunc(split bool, splitsp string) BFunc {
-	if splitsp == "" {
-		splitsp = ","
+func SplitFunc(split bool, sp string) Func {
+	if sp == "" {
+		sp = ","
 	}
 	return &splitFunc{
-		split:   split,
-		splitsp: splitsp,
+		split: split,
+		sp:    sp,
 	}
 }
 
@@ -26,7 +26,7 @@ func SplitFunc(split bool, splitsp string) BFunc {
 func (s *splitFunc) Bind(inValue reflect.Value) (outValue reflect.Value) {
 	outValue = inValue
 	if s.split && inValue.IsValid() && inValue.Type().Kind() == reflect.String {
-		outValue = reflect.ValueOf(strings.Split(inValue.String(), s.splitsp))
+		outValue = reflect.ValueOf(strings.Split(inValue.String(), s.sp))
 	}
 	return outValue
 }

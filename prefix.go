@@ -1,4 +1,4 @@
-package funcs
+package binding
 
 import (
 	"reflect"
@@ -10,7 +10,7 @@ type prefixFunc struct {
 }
 
 // PrefixFunc method
-func PrefixFunc(prefix string) BFunc {
+func PrefixFunc(prefix string) Func {
 	return &prefixFunc{prefix}
 }
 
