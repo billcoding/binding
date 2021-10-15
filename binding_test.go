@@ -9,7 +9,7 @@ func TestBinding(t *testing.T) {
 		type model struct {
 			ID int `binding:"name(ID2)"`
 		}
-		testItemCases = append(testItemCases, &testItemCase{&model{}, &model{}, nil})
+		testItemCases = append(testItemCases, &testItemCase{&model{}, &model{}, map[string]interface{}{"ID2": 0}})
 		testItemCases = append(testItemCases, &testItemCase{&model{}, &model{100}, map[string]interface{}{"ID2": "100"}})
 	}
 	// test for default
